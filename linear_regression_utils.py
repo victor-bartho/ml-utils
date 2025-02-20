@@ -39,7 +39,7 @@ def calculate_gradient(x: npt.NDArray[np.number], y: npt.NDArray[np.number], w, 
 
     parameters:
     - x: vector with x values training_data, m examples. nparray(m,)
-    - y: vector with y values target_values m examples. nparray(m,)
+    - y: vector with y values target_values, m examples. nparray(m,)
     - w: slope of linear regression. scalar value
     - b: intercept of linear regression. scalar value
     '''
@@ -47,7 +47,7 @@ def calculate_gradient(x: npt.NDArray[np.number], y: npt.NDArray[np.number], w, 
     m = x.shape[0]
     #validate sample size:
     if m <= 0:
-        return None
+        raise ValueError('Invalid sample size. Check x vector')
 
     #initialize variables
     dw_sum = 0
@@ -66,3 +66,61 @@ def calculate_gradient(x: npt.NDArray[np.number], y: npt.NDArray[np.number], w, 
     dj_db = db_sum/m
 
     return dj_dw, dj_db
+
+def calculate_gradient_descent(x_vector: npt.NDArray[np.number] , y_vector: npt.NDArray[np.number], w_initial, b_initial,
+                               num_iterations, alpha, generate_history=False):
+    '''
+    returns w and b values calulate bu gradient descent algorithm. In case generate_history is selected, additionaly 
+    outputs params values history and cost function values.
+
+    parameters:
+    - x_vector: vector with x values training_data, m examples. nparray(m,)
+    - y_vector: vector with y values target_values, m examples. nparray(m,)
+    - w_initial: initial chosen value for slope of linear regression. scalar value
+    - b_initial: initial chosen value for intercept of linear regression. scalar value
+    - num_iterations: number of iterations for gradient descent. scalar value
+    - alpha: learning rate for gradient descent algorithm. scalar value
+    - generate_history: selector for generating two list of values while iterating
+    '''
+    #initiate w and b
+    w = w_initial
+    b = b_initial
+
+    if generate_history:
+        params_history = []
+        j_history = []
+        
+        for _ in range(num_iterations):
+            #define partial derivatives
+            dj_dw, dj_db = calculate_gradient(x_vector, y_vector, w, b) #returns partial derivatives for both w and b
+
+            #calculates new w and b values according to gradient descent algorithm
+            w_temp = w - alpha*dj_dw
+            b_temp = b - alpha*dj_db
+
+            #simultaneously update w and b values	
+            w = w_temp
+            b = b_temp
+
+            #register history for plotting graphs and other utilities
+                #limit max number of registers to prevent resurce exhaustion. Register every 10 iterations do avoid overregistry
+            if (num_iterations<1000) and (num_iterations%10==0): 
+                params_history.append([w,b])
+                j_history.append(calculate_cost(x_vector, y_vector, w, b))
+        return w, b, params_history, j_history
+    else:
+        for _ in range(num_iterations):
+            #define partial derivatives
+            dj_dw, dj_db = calculate_gradient(x_vector, y_vector, w, b) #returns partial derivatives for both w and b
+
+            #calculates new w and b values according to gradient descent algorithm
+            w_temp = w - alpha*dj_dw
+            b_temp = b - alpha*dj_db
+
+            #simultaneously update w and b values	
+            w = w_temp
+            b = b_temp
+
+        return w,b
+
+
