@@ -123,4 +123,3 @@ def calculate_gradient_descent(x_vector: npt.NDArray[np.number] , y_vector: npt.
 
         return w,b
 
-
